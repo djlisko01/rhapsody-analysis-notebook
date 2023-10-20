@@ -13,13 +13,21 @@ setwd("~/gitrepos/rhapsody-analysis-notebook/")
 ```
 
 ```{r}
+```
+
+
+```{r}
 expr.mtx <- ReadMtx(
-  mtx="./data/tmp/sparse_matrix.mtx",
-  cells = "./data/tmp/barcodes.tsv",
-  features = "./data/tmp/features.tsv",
+  mtx="../data/tmp/sparse_matrix.mtx",
+  cells = "../data/tmp/barcodes.tsv",
+  features = "../data/tmp/features.tsv",
   cell.column = 1,
   feature.column = 1
 )
+```
+
+
+```{r}
 ```
 
 ```{r}
