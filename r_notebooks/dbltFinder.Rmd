@@ -35,8 +35,9 @@ doublet_score = sce$scDblFinder.score
 doublet_class = sce$scDblFinder.class
 ```
 ```{r}
-save_path="./data/tmp/doublt_scores.csv"
-df <- data.frame(doublet.class=doublet_class, doublet.score=doublet_score)
-write.csv(df, file=save_path, row.names=FALSE)
+save_path="../data/tmp/dblt_scores.csv"
+rows <- colnames(seurat_object)
+df <- data.frame(doublet.class=doublet_class, doublet.score=doublet_score, row.names = rows)
+write.csv(df, file=save_path, row.names=TRUE)
 ```
 
