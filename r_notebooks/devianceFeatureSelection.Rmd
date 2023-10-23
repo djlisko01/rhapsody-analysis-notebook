@@ -1,0 +1,37 @@
+---
+title: "featureSelection"
+author: "Daniel Lisko"
+date: "2023-10-20"
+output: html_document
+---
+
+```{r}
+library(scry)
+library(Seurat)
+library(SingleCellExperiment)
+```
+
+
+```{r}
+wd <- "~/gitrepos/rhapsody-analysis-notebook/data/tmp/"
+setwd(wd)
+```
+
+```{r}
+expr.mtx <- ReadMtx(
+  mtx="sparse_matrix.mtx",
+  cells = "barcodes.tsv",
+  features = "features.tsv",
+  cell.column = 1,
+  feature.column = 1
+)
+seurat_object <- CreateSeuratObject(counts = expr.mtx)
+sce <- as.SingleCellExperiment(seurat_object)
+```
+
+```{r}
+sce <- devianceFeatureSelection(sce, assay="counts")
+binomial.dev <- rowData(sce)$binomial_deviance
+write.csv(x=data.frame(binomial.dev), file = "binomial.dev.csv")
+```
+
