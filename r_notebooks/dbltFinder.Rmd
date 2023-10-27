@@ -12,8 +12,6 @@ library(BiocParallel)
 setwd("~/gitrepos/rhapsody-analysis-notebook/")
 ```
 
-```{r}
-```
 
 
 ```{r}
@@ -27,8 +25,6 @@ expr.mtx <- ReadMtx(
 ```
 
 
-```{r}
-```
 
 ```{r}
 seurat_object <- CreateSeuratObject(counts = expr.mtx)
