@@ -16,3 +16,5 @@ termcolor
 adjustText
 anndata2ri
 scirpy
+asyncio
+bokeh

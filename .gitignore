@@ -6,4 +6,5 @@ data/
 .Rhistory
 .ipynb_checkpoints/
 .venv/
+archive/
 figures

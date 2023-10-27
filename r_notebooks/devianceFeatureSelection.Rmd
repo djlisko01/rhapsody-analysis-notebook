@@ -13,11 +13,10 @@ library(SingleCellExperiment)
 
 
 ```{r}
+
 wd <- "~/gitrepos/rhapsody-analysis-notebook/data/tmp/"
 setwd(wd)
-```
 
-```{r}
 expr.mtx <- ReadMtx(
   mtx="sparse_matrix.mtx",
   cells = "barcodes.tsv",
@@ -30,8 +29,14 @@ sce <- as.SingleCellExperiment(seurat_object)
 ```
 
 ```{r}
+setwd(wd)
 sce <- devianceFeatureSelection(sce, assay="counts")
 binomial.dev <- rowData(sce)$binomial_deviance
 write.csv(x=data.frame(binomial.dev), file = "binomial.dev.csv")
 ```
+
+```{r}
+sce
+```
+
 

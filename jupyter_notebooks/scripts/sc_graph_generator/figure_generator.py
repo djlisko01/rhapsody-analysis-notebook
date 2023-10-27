@@ -131,7 +131,7 @@ def plot_hist_viol(y_var, fig=None, bins=100):
     plot_qc_violin(y_var, ax=ax)
 
 
-def calculate_descriptive(adata: AnnData, mt_threshold: float, sample_name, is_rhapsody=False) -> pd.DataFrame:
+def calculate_descriptive(adata: AnnData, mt_threshold: float, sample_name) -> pd.DataFrame:
     pd.options.display.float_format = '{:,.2f}'.format
     obs_df = adata.obs
     pct_above_threshold = np.sum(obs_df.pct_counts_mt < mt_threshold) / len(obs_df) * 100
@@ -142,19 +142,27 @@ def calculate_descriptive(adata: AnnData, mt_threshold: float, sample_name, is_r
             "% MT Per Cell": obs_df.pct_counts_mt.median(),
             f"Cells Pass {mt_threshold}% Threshold": f"{pct_above_threshold:.2f}%",
         }
-
-    if is_rhapsody:
-        results = obs_df["Sample_Tag"].value_counts()
-        rhap_stats = {
-            "Number of Multi Tagged Cells": results["Multiplet"],
-            "% Multi Tagged Cells":  f"{(results['Multiplet'] / np.sum(results)) * 100:.2f}%",
-            "Number of Undetermined Tags": results["Undetermined"],
-            "% Undetermined Cells Tagged": f"{(results['Undetermined'] / np.sum(results)) * 100:.2f}%",
-        }
-        stats.update(rhap_stats)
-
     df = pd.DataFrame(stats, index=[sample_name])
     return df.round(2).T
+
+def multiplets_report(adata: AnnData, sample_name) -> pd.DataFrame:
+    pd.options.display.float_format = '{:,.2f}'.format
+    obs_df = adata.obs
+    results = obs_df["Sample_Tag"].value_counts()
+    multiplet_stats = {
+        "Number of Multi Tagged Cells": results["Multiplet"],
+        "% Multi Tagged Cells":  f"{(results['Multiplet'] / np.sum(results)) * 100:.2f}%",
+        "Number of Undetermined Tags": results["Undetermined"],
+        "% Undetermined Cells Tagged": f"{(results['Undetermined'] / np.sum(results)) * 100:.2f}%",
+        
+        }
+
+    return pd.DataFrame(multiplet_stats, index=[sample_name])
+
+
+
+
+
 
 
 def get_per_sample_stats(adata: AnnData, mt_threshold: float, samples_col: str) -> pd.DataFrame:
