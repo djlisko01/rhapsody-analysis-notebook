@@ -159,12 +159,6 @@ def multiplets_report(adata: AnnData, sample_name) -> pd.DataFrame:
 
     return pd.DataFrame(multiplet_stats, index=[sample_name])
 
-
-
-
-
-
-
 def get_per_sample_stats(adata: AnnData, mt_threshold: float, samples_col: str) -> pd.DataFrame:
     sample_stats = adata.obs.groupby(samples_col)[[
         "pct_counts_mt",
@@ -236,6 +230,120 @@ def __add_headers(df, ax, col_widths):
         ax.text(x + col_widths[j + 1] / 2, -1, header, weight='bold', ha='center', va='center', fontsize=20)
         x += col_widths[j + 1]  # Move to the center of the next column
     ax.axhline(y=-0.5, color='black', linewidth=2)
+
+
+########################## ADT PLOTS ####################################
+def plot_abt_umap(mdata, abt_tag, bar_label=None, show_spine=False, ax=None, min_threshold=None, show_bar=False, fontsize=20,vmin=0, vmax=6):
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    if ax is None:
+        ax = plt.axes();
+    abt =  mdata["adt"].copy()
+    abt.X = np.array(abt.X.todense())
+    abt_exp = abt[:, abt.var_names == abt_tag].X.flatten()
+    title = abt_tag.split("|")[0].split(":")[0] + "-ADT"
+
+    
+    if min_threshold is not None:
+        abt_exp[abt_exp >= min_threshold] = 0.0 # Set min thresholds
+        
+    if abt_tag:
+        abt_exp[abt_exp < 0]  = 0
+    scalarmappable = plt.cm.ScalarMappable(cmap='turbo', norm=plt.Normalize(vmin=0, vmax=vmax))
+    scalarmappable.set_array(abt_exp);
+    
+    sns.scatterplot(
+        pd.DataFrame(mdata.mod["gex"].obsm["X_umap"]), 
+        x=0, y=1, 
+        c=abt_exp,
+#         cmap='turbo',
+        cmap=scalarmappable.cmap,
+        norm=scalarmappable.norm,
+        size=0.1,
+        alpha=0.7,
+        legend=False,
+        edgecolor="black",
+        linewidth=0.03,
+        ax=ax
+    );
+    
+    ax.set_title(title, fontweight='bold', fontsize=fontsize);
+    
+    if not show_spine:
+        [ax.spines[spine].set_visible(False) for spine in ["top", "right", "bottom", "left"]]
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_ylabel(None)
+        ax.set_xlabel(None)
+        
+    if show_bar:  
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("left", size="5%", pad=0.3)
+#         scalarmappable = plt.cm.ScalarMappable(cmap='turbo', norm=plt.Normalize(vmin=0));
+#         scalarmappable.set_array(abt_exp);
+        ax.figure.colorbar(scalarmappable, label=bar_label, shrink=0.4, cax=cax);
+    return ax
+
+#Define a function to plot the histogram and add median vertical line
+def plot_hist_with_median(data, color, hline, **kwargs):
+    sns.histplot(data, **kwargs)
+    if isinstance(hline, dict):
+        hline = hline[data["Antibody"].unique()[0]]
+    
+    plt.axhline(hline, color='red', linestyle='dashed', linewidth=2)
+    plt.annotate(f"Cuttoff: {hline}", (np.median(plt.xlim()), hline + 0.05))
+
+def plot_cd3_cells(df, mdata, to_keep, to_filter, to_plot, cut_offs):
+    rows = ((df["CD3"] >= cut_offs["CD3"]) &
+            (df[to_keep] >= cut_offs[to_keep]) & 
+            (df[to_filter] < cut_offs[to_filter])
+           )
+    # rows = ((df["CD3"] >= cut_offs["CD3"]))
+
+    expression = mdata["adt"].X
+    idx = [idx for idx, row in zip(rows.index, rows) if row == True]
+    col_bool = list(mdata.mod["adt"].var.adt_names.isin(to_plot))
+
+    # return (expression[:, col_bool][rows], to_plot[::-1])
+    
+    tmp = pd.DataFrame(expression[:, col_bool][rows].todense(), columns=to_plot[::-1], index=idx)
+
+    x, y = to_plot
+    sns.scatterplot(
+        tmp,
+        x=x,
+        y=y,
+    )
+
+    plt.xlabel(x)
+    plt.ylabel(y)
+
+    x_ref = cut_offs[x]
+    y_ref = cut_offs[y]
+
+    q1 = tmp[(tmp[x] <= x_ref) & (tmp[y] > y_ref)].shape[0]
+    q2 = tmp[(tmp[x] > x_ref) & (tmp[y] > y_ref)].shape[0]
+    q3 = tmp[(tmp[x] > x_ref) & (tmp[y] <= y_ref)].shape[0]
+    q4 = tmp[(tmp[x] <= x_ref) & (tmp[y] <= y_ref)].shape[0]
+
+
+    plt.axhline(y=x_ref)
+    plt.axvline(x=y_ref)
+
+    ymax = np.max(tmp[y])
+    xmax = np.max(tmp[x])
+
+    plt.title(to_keep)
+
+    # plt.ylim(0 - 0.25, ymax + (ymax * 0.2))
+    plt.show()
+
+        # exp = pd.DataFrame(expression[:, col_bool], columns=naive)
+    q1 = tmp.index[(tmp[x]<= x_ref) & (tmp[y] > y_ref)].astype(str)
+    q2 = tmp.index[(tmp[x] > x_ref) & (tmp[y] > y_ref)].astype(str)
+    q3 = tmp.index[(tmp[x] > x_ref) & (tmp[y] <= y_ref)].astype(str)
+    q4 = tmp.index[(tmp[x] <= x_ref) & (tmp[y] <= y_ref)].astype(str)
+    
+    return q1, q2, q3, q4
 
 
 
