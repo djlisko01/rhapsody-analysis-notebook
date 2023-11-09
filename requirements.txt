@@ -18,3 +18,4 @@ anndata2ri
 scirpy
 asyncio
 bokeh
+scvi-tools
