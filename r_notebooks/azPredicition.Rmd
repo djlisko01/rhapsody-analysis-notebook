@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(Azimuth)
+library(Seurat)
+library(SeuratData)
+library(SeuratDisk)
+```
+
+```{r}
+ref_path = "~/gitrepos/rhapsody-analysis-notebook/r_notebooks/azimuth_ref/"
+path_ad = "~/gitrepos/rhapsody-analysis-notebook/data/qc_data/121c_azmth_ready_v2.h5ad"
+az_results <- RunAzimuth(query = path_ad, reference=ref_path)
+```
+```{r}
+p1 <- DimPlot(az_results,  group.by = "predicted.celltype.l1", label = TRUE, label.size = 3) + NoLegend()
+
+p2 <-DimPlot(az_results, group.by = "predicted.celltype.l2", label = TRUE, label.size = 3) + NoLegend()
+
+p3 <- FeaturePlot(az_results, features = "predicted.celltype.l1.score")
+p4 <-FeaturePlot(az_results, features = "predicted.celltype.l2.score")
+
+p1 + p2  + p3 + p4 
+```
+
+
+```{r}
+file.path = "~/gitrepos/rhapsody-analysis-notebook/data/qc_data/121c_azmth_pred.h5seurat"
+SaveH5Seurat(az_results, file.path)
+```
+
+
+```{r}
+save_path <- "~/gitrepos/rhapsody-analysis-notebook/data/qc_data/121c_azmth_prd.csv"
+
+df <- data.frame(
+  az_results$predicted.celltype.l1.score,
+  az_results$predicted.celltype.l1,
+  az_results$predicted.celltype.l2.score,
+  az_results$predicted.celltype.l2
+)
+
+names(df) <- c("az_l1_score", "az_l1_celltype", "az_l2_score", "az_l2_celltype")
+
+write.csv(df, file = save_path, row.names = TRUE)
+
+```
+

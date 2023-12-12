@@ -2,7 +2,7 @@
 #TCR locus / chain calls must be modified as follows: "TCR_Alpha" -> "TRA", "TCR_Beta" -> "TRB", "TCR_Delta" -> "TRD", "TCR_Gamma" -> "TRG"
 #BCR locus / chain calls must be modified as follows: "BCR_Heavy" -> "IGH", "BCR_Kappa" -> "IGK", "BCR_Lambda" -> "IGL"
 
-demo <- read.table(file = "/sbgenomics/project-files/VDJ_demo_data/pipeline_output_provided/RhapTCRBCRdemo_VDJ_Dominant_Contigs.csv.gz", sep = ",", header = T)
+demo <- read.table(file = "~/gitrepos/rhapsody-analysis-notebook/data/vdj/copied-FASTQs-expected-cells-30K-v2-rerun-MC_VDJ_Dominant_Contigs_AIRR.tsv", sep = ",", header = T)
 table(demo$Chain_Type)
 dat <- demo
 new_df <- as.data.frame(matrix(nrow = nrow(dat), ncol = ncol(dat) ))

@@ -19,3 +19,4 @@ scirpy
 asyncio
 bokeh
 scvi-tools
+tcrdist3
