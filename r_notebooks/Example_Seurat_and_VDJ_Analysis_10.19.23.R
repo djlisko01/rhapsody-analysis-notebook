@@ -10,9 +10,8 @@ devtools::install_github("satijalab/azimuth")
 library(SeuratData)
 library(Azimuth)
 
-
 #Read RDS object
-cbmc <- readRDS("/sbgenomics/project-files/RhapTCRBCRdemo_Seurat.rds")
+cbmc <- readRDS("~/gitrepos/rhapsody-analysis-notebook/data/gex/copied-FASTQs-expected-cells-30K-v2-rerun-MC_Seurat.rds")
 
 #Subset out undetermined / multiplet cells
 Idents(cbmc) <- cbmc@meta.data$Sample_Name
@@ -49,7 +48,7 @@ cbmc_normalized <- FindVariableFeatures(cbmc_normalized)
 cbmc_normalized <- RunPCA(cbmc_normalized, verbose = FALSE)
 
 #Generate Elbow Plot
-ElbowPlot(cbmc_normalized, ndims = 30)
+ElbowPlot(cbmc_normalized, ndims = 50)
 
 #Nearest Neighbor Graph Construction
 cbmc_normalized <- FindNeighbors(cbmc_normalized, dims = 1:12)
@@ -113,11 +112,11 @@ devtools::install_github("ncborcherding/scRepertoire")
 library(Seurat)
 library(scRepertoire)
 
-full_airr <- read.table(file = "/sbgenomics/project-files/_1_RhapTCRBCRdemo_VDJ_Dominant_Contigs_AIRR.tsv", sep = "\t", header = T)
 
-demo_stcalls <- read.table("/sbgenomics/project-files/RhapTCRBCRdemo_Sample_Tag_Calls.csv", header = T, sep = ",")
 
-demo_seurat_object <- readRDS("/sbgenomics/project-files/RhapTCRBCRdemo_Seurat.rds")
+full_airr <- read.table(file = "~/gitrepos/rhapsody-analysis-notebook/data/vdj/copied-FASTQs-expected-cells-30K-v2-rerun-MC_VDJ_Dominant_Contigs_AIRR.tsv", sep = "\t", header = T)
+demo_stcalls <- read.table("~/gitrepos/rhapsody-analysis-notebook/data/sample_tags/copied-FASTQs-expected-cells-30K-v2-rerun-MC_Sample_Tag_Calls.csv", header = T, sep = ",")
+demo_seurat_object <- readRDS("~/gitrepos/rhapsody-analysis-notebook/data/gex/copied-FASTQs-expected-cells-30K-v2-rerun-MC_Seurat.rds")
 
 
 tcr_paired <- subset(demo_seurat_object, TCR_Paired_Chains == "True")
@@ -131,11 +130,11 @@ for(i in 1:length(levels(factor(demo_stcalls$Sample_Name)))){
   #Subset the full AIRR file into sample-specific files and remove experimental cell type column
   sub_df <- full_airr[which(full_airr$cell_id %in% x & full_airr$cell_id %in% colnames(tcr_paired)),-2]
   #Write separated sample AIRR formatted files to a folder (screpertoire_data_tcr)
-  write.table(x = sub_df, file = paste("/sbgenomics/workspace/screpertoire_data_tcr/TCR_", as.character(levels(factor(demo_stcalls$Sample_Name))[i]), 
+  write.table(x = sub_df, file = paste("~/gitrepos/rhapsody-analysis-notebook/data/vdj/", as.character(levels(factor(demo_stcalls$Sample_Name))[i]), 
                                        "_VDJ_Dominant_Contigs_AIRR.tsv", sep = ""), sep = "\t", quote = F, row.names = F)
 }
 
-TCR <- loadContigs(dir = "/sbgenomics/workspace/immunarch_data/screpertoire_data_tcr", format = "BD")
+TCR <- loadContigs(dir = "~/gitrepos/rhapsody-analysis-notebook/data/vdj/", format = "BD")
 TCR_combined <- combineTCR(TCR, samples = c("Multiplet", "SampleTag05", "SampleTag06", "Undetermined"), removeNA = F, removeMulti = F, filterMulti = F)
 
 subset <- subsetContig(TCR_combined, name = "sample", 
